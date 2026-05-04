@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<title>Ali Hardcore Parkour FIXED</title>
+
+<style>
+html, body {
+    margin: 0;
+    overflow: hidden;
+    height: 100%;
+}
+
+body {
+    background: skyblue;
+}
+
+.bol {
+    width: 60px;
+    height: 60px;
+    position: absolute;
+    z-index: 2;
+}
+
+.platform {
+    position: absolute;
+    height: 10px;
+    background: darkgreen;
+}
+
+.gräss {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+</style>
+</head>
+
+<body>
+
+<img src="numer1.png" class="bol">
+<img src="ALibab.webp" class="gräss">
+
+<script>
+let player = document.querySelector(".bol");
+
+let size = 60;
+
+let x = 100;
+let y = window.innerHeight - size;
+
+let prevY = y;
+
+let velocityY = 0;
+let gravity = 1.4;
+
+let left = false;
+let right = false;
+
+let jumps = 0;
+let maxJumps = 2;
+
+let touchingLeftWall = false;
+let touchingRightWall = false;
+
+// 😈 SVÅR BANA
+let platforms = [
+    {x: 150, y: 550, w: 120},
+    {x: 350, y: 480, w: 100},
+    {x: 600, y: 420, w: 90},
+    {x: 850, y: 350, w: 80},
+    {x: 600, y: 280, w: 80},
+    {x: 350, y: 220, w: 70},
+    {x: 150, y: 150, w: 60}
+];
+
+// skapa plattformar
+platforms.forEach(p => {
+    let el = document.createElement("div");
+    el.className = "platform";
+    el.style.left = p.x + "px";
+    el.style.top = p.y + "px";
+    el.style.width = p.w + "px";
+    document.body.appendChild(el);
+});
+
+// controls
+document.addEventListener("keydown", e => {
+    if (e.key === "ArrowLeft") left = true;
+    if (e.key === "ArrowRight") right = true;
+
+    if (e.key === "ArrowUp") {
+
+        // wall jump
+        if (touchingLeftWall) {
+            velocityY = -17;
+            x += 18;
+            return;
+        }
+
+        if (touchingRightWall) {
+            velocityY = -17;
+            x -= 18;
+            return;
+        }
+
+        // double jump
+        if (jumps < maxJumps) {
+            velocityY = -17;
+            jumps++;
+        }
+    }
+});
+
+document.addEventListener("keyup", e => {
+    if (e.key === "ArrowLeft") left = false;
+    if (e.key === "ArrowRight") right = false;
+});
+
+// game loop
+setInterval(() => {
+
+    prevY = y; // 🔥 viktigt
+
+    if (left) x -= 7;
+    if (right) x += 7;
+
+    velocityY += gravity;
+    y += velocityY;
+
+    // TAK
+    if (y < 0) {
+        y = 0;
+        velocityY = 0;
+    }
+
+    // 🔥 FIXED PLATFORM COLLISION
+    platforms.forEach(p => {
+        let wasAbove = prevY + size <= p.y;
+        let isFalling = velocityY >= 0;
+
+        if (
+            x + size > p.x &&
+            x < p.x + p.w &&
+            y + size >= p.y &&
+            wasAbove &&
+            isFalling
+        ) {
+            y = p.y - size;
+            velocityY = 0;
+            jumps = 0;
+        }
+    });
+
+    // mark
+    let groundY = window.innerHeight - size;
+    if (y > groundY) {
+        y = groundY;
+        velocityY = 0;
+        jumps = 0;
+    }
+
+    // väggar
+    let maxX = window.innerWidth - size;
+
+    touchingLeftWall = false;
+    touchingRightWall = false;
+
+    if (x <= 0) {
+        x = 0;
+        touchingLeftWall = true;
+    }
+
+    if (x >= maxX) {
+        x = maxX;
+        touchingRightWall = true;
+    }
+
+    player.style.left = x + "px";
+    player.style.top = y + "px";
+
+}, 30);
+</script>
+
+</body>
+</html>
