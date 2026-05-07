@@ -34,6 +34,23 @@ body {
     height: 100%;
     z-index: -1;
 }
+
+/* ⚡ DASH-SKUGGA */
+.dash-shadow {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    opacity: 0.6;
+    filter: blur(2px);
+    z-index: 1;
+    animation: fadeOut 0.3s linear forwards;
+}
+
+/* ✨ Fade-out animation */
+@keyframes fadeOut {
+    0% { opacity: 0.6; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.25); }
+}
 </style>
 </head>
 
@@ -85,8 +102,36 @@ platforms.forEach(p => {
     document.body.appendChild(el);
 });
 
+/* ⚡ Funktion som skapar dash-skugga */
+function createDashShadow() {
+    let shadow = document.createElement("img");
+    shadow.src = player.src;
+    shadow.className = "dash-shadow";
+    shadow.style.left = x + "px";
+    shadow.style.top = y + "px";
+
+    document.body.appendChild(shadow);
+
+    setTimeout(() => shadow.remove(), 300);
+}
+
 // controls
 document.addEventListener("keydown", e => {
+
+    // ⚡ DASH LEFT (A)
+    if (e.key === "a") {
+        createDashShadow();
+        x -= 180;
+        return;
+    }
+
+    // ⚡ DASH RIGHT (D)
+    if (e.key === "d") {
+        createDashShadow();
+        x += 180;
+        return;
+    }
+
     if (e.key === "ArrowLeft") left = true;
     if (e.key === "ArrowRight") right = true;
 
@@ -121,7 +166,7 @@ document.addEventListener("keyup", e => {
 // game loop
 setInterval(() => {
 
-    prevY = y; // 🔥 viktigt
+    prevY = y;
 
     if (left) x -= 7;
     if (right) x += 7;
@@ -135,7 +180,7 @@ setInterval(() => {
         velocityY = 0;
     }
 
-    // 🔥 FIXED PLATFORM COLLISION
+    // PLATFORM COLLISION
     platforms.forEach(p => {
         let wasAbove = prevY + size <= p.y;
         let isFalling = velocityY >= 0;
