@@ -36,7 +36,6 @@ body {
     z-index: -1;
 }
 
-/* ⚡ DASH-SKUGGA */
 .dash-shadow {
     position: absolute;
     width: 60px;
@@ -47,8 +46,6 @@ body {
     animation: fadeOut 0.3s linear forwards;
 }
 
-
-
 .Enes {
     width: 70px;
     height: 70px;
@@ -57,7 +54,6 @@ body {
     top: 35%;
 }
 
-/* ✨ Fade-out animation */
 @keyframes fadeOut {
     0% { opacity: 0.6; transform: scale(1); }
     100% { opacity: 0; transform: scale(1.25); }
@@ -73,6 +69,7 @@ body {
 
 <script>
 let player = document.querySelector(".bol");
+let enes = document.querySelector(".Enes");
 
 let size = 60;
 
@@ -93,7 +90,20 @@ let maxJumps = 2;
 let touchingLeftWall = false;
 let touchingRightWall = false;
 
-//   BANA
+// ⭐ Räkna om Enes procent-position till pixlar
+let enesX = window.innerWidth * 0.80;
+let enesY = window.innerHeight * 0.35;
+let enesW = enes.offsetWidth;
+let enesH = enes.offsetHeight;
+
+// ⭐ Flytta Enes till pixelpositioner (så kollision funkar)
+enes.style.left = enesX + "px";
+enes.style.top = enesY + "px";
+
+// ⭐ Plattform under Enes (DIN VERSION)
+let enesPlatformWidth = 315;
+let enesPlatformX = enesX - (enesPlatformWidth / 2) + (enesW / 15) + 140;
+
 let platforms = [
     {x: 150, y: 550, w: 120},
     {x: 350, y: 480, w: 100},
@@ -101,7 +111,10 @@ let platforms = [
     {x: 850, y: 350, w: 80},
     {x: 600, y: 280, w: 80},
     {x: 350, y: 220, w: 70},
-    {x: 150, y: 150, w: 60}
+    {x: 150, y: 150, w: 60},
+
+    // ⭐ Större mark under Enes
+    {x: enesPlatformX, y: enesY + enesH, w: enesPlatformWidth}
 ];
 
 // skapa plattformar
@@ -111,10 +124,16 @@ platforms.forEach(p => {
     el.style.left = p.x + "px";
     el.style.top = p.y + "px";
     el.style.width = p.w + "px";
+
+    // ⭐ Bara Enes-plattformen får z-index -1
+    if (p.w === enesPlatformWidth) {
+        el.style.zIndex = -1;
+    }
+
     document.body.appendChild(el);
 });
 
-/* ⚡ Funktion som skapar dash-skugga */
+// dash skugga
 function createDashShadow() {
     let shadow = document.createElement("img");
     shadow.src = player.src;
@@ -130,14 +149,12 @@ function createDashShadow() {
 // controls
 document.addEventListener("keydown", e => {
 
-    // ⚡ DASH LEFT (A)
     if (e.key === "a") {
         createDashShadow();
         x -= 180;
         return;
     }
 
-    // ⚡ DASH RIGHT (D)
     if (e.key === "d") {
         createDashShadow();
         x += 180;
@@ -149,7 +166,6 @@ document.addEventListener("keydown", e => {
 
     if (e.key === "ArrowUp") {
 
-        // wall jump
         if (touchingLeftWall) {
             velocityY = -17;
             x += 18;
@@ -162,7 +178,6 @@ document.addEventListener("keydown", e => {
             return;
         }
 
-        // double jump
         if (jumps < maxJumps) {
             velocityY = -17;
             jumps++;
