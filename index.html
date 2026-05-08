@@ -25,7 +25,8 @@ body {
 .platform {
     position: absolute;
     height: 10px;
-    background: darkgreen;
+    background: rgb(48, 48, 48);
+    border-radius: 3px;
 }
 
 .gräss {
@@ -46,6 +47,16 @@ body {
     animation: fadeOut 0.3s linear forwards;
 }
 
+
+
+.Enes {
+    width: 70px;
+    height: 70px;
+    position: absolute;
+    left: 80%;
+    top: 35%;
+}
+
 /* ✨ Fade-out animation */
 @keyframes fadeOut {
     0% { opacity: 0.6; transform: scale(1); }
@@ -58,6 +69,7 @@ body {
 
 <img src="IMG_20260504_144159.jpg" class="bol">
 <img src="oliver.webp" class="gräss">
+<img src="IMG_20260508_125050.jpg" alt="" class="Enes">
 
 <script>
 let player = document.querySelector(".bol");
