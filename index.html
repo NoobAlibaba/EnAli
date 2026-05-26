@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
 <meta charset="UTF-8">
-<title>Ali Hardcore Parkour FIXED</title>
+<title>Skolan.se</title>
 
 <style>
 html, body {
@@ -12,7 +12,7 @@ html, body {
 }
 
 body {
-    background: skyblue;
+    background: rgb(0, 0, 0);
 }
 
 .bol {
@@ -25,7 +25,7 @@ body {
 .platform {
     position: absolute;
     height: 10px;
-    background: rgb(48, 48, 48);
+    background: rgb(20, 10, 20);
     border-radius: 3px;
 }
 
@@ -40,7 +40,7 @@ body {
     position: absolute;
     width: 60px;
     height: 60px;
-    opacity: 0.6;
+    opacity: 1.6;
     filter: blur(2px);
     z-index: 1;
     animation: fadeOut 0.3s linear forwards;
@@ -58,6 +58,14 @@ body {
     0% { opacity: 0.6; transform: scale(1); }
     100% { opacity: 0; transform: scale(1.25); }
 }
+
+.Hecktor {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    top: 0%;
+    left: 1px;
+}
 </style>
 </head>
 
@@ -65,44 +73,30 @@ body {
 
 <img src="IMG_20260504_144159.jpg" class="bol">
 <img src="oliver.webp" class="gräss">
-<img src="IMG_20260508_125050.jpg" alt="" class="Enes">
+<img src="Enes.jpg" class="Enes">
+<img src="Hecktor.webp" class="Hecktor">
 
 <script>
-let player = document.querySelector(".bol");
+let jul = document.querySelector(".bol");
 let enes = document.querySelector(".Enes");
 
-let size = 60;
+let julX = 100;
+let julY = 100;
+let julVelY = 0;
+let julLeft = false;
+let julRight = false;
+let julWallLeft = false;
+let julWallRight = false;
 
-let x = 100;
-let y = window.innerHeight - size;
-
-let prevY = y;
-
-let velocityY = 0;
-let gravity = 1.4;
-
-let left = false;
-let right = false;
-
-let jumps = 0;
-let maxJumps = 2;
-
-let touchingLeftWall = false;
-let touchingRightWall = false;
-
-// ⭐ Räkna om Enes procent-position till pixlar
 let enesX = window.innerWidth * 0.80;
 let enesY = window.innerHeight * 0.35;
-let enesW = enes.offsetWidth;
-let enesH = enes.offsetHeight;
+let enesVelY = 0;
+let enesLeft = false;
+let enesRight = false;
+let enesWallLeft = false;
+let enesWallRight = false;
 
-// ⭐ Flytta Enes till pixelpositioner (så kollision funkar)
-enes.style.left = enesX + "px";
-enes.style.top = enesY + "px";
-
-// ⭐ Plattform under Enes (DIN VERSION)
-let enesPlatformWidth = 315;
-let enesPlatformX = enesX - (enesPlatformWidth / 2) + (enesW / 15) + 140;
+let gravity = 1.4;
 
 let platforms = [
     {x: 150, y: 550, w: 120},
@@ -111,146 +105,123 @@ let platforms = [
     {x: 850, y: 350, w: 80},
     {x: 600, y: 280, w: 80},
     {x: 350, y: 220, w: 70},
-    {x: 150, y: 150, w: 60},
-
-    // ⭐ Större mark under Enes
-    {x: enesPlatformX, y: enesY + enesH, w: enesPlatformWidth}
+    {x: 150, y: 150, w: 60}
 ];
 
-// skapa plattformar
 platforms.forEach(p => {
     let el = document.createElement("div");
     el.className = "platform";
     el.style.left = p.x + "px";
     el.style.top = p.y + "px";
     el.style.width = p.w + "px";
-
-    // ⭐ Bara Enes-plattformen får z-index -1
-    if (p.w === enesPlatformWidth) {
-        el.style.zIndex = -1;
-    }
-
     document.body.appendChild(el);
 });
 
-// dash skugga
-function createDashShadow() {
+function dashShadow(img, x, y) {
     let shadow = document.createElement("img");
-    shadow.src = player.src;
+    shadow.src = img.src;
     shadow.className = "dash-shadow";
     shadow.style.left = x + "px";
     shadow.style.top = y + "px";
-
     document.body.appendChild(shadow);
-
     setTimeout(() => shadow.remove(), 300);
 }
 
-// controls
 document.addEventListener("keydown", e => {
-
-    if (e.key === "a") {
-        createDashShadow();
-        x -= 180;
-        return;
-    }
-
-    if (e.key === "d") {
-        createDashShadow();
-        x += 180;
-        return;
-    }
-
-    if (e.key === "ArrowLeft") left = true;
-    if (e.key === "ArrowRight") right = true;
+    if (e.key === "ArrowLeft") julLeft = true;
+    if (e.key === "ArrowRight") julRight = true;
 
     if (e.key === "ArrowUp") {
-
-        if (touchingLeftWall) {
-            velocityY = -17;
-            x += 18;
-            return;
-        }
-
-        if (touchingRightWall) {
-            velocityY = -17;
-            x -= 18;
-            return;
-        }
-
-        if (jumps < maxJumps) {
-            velocityY = -17;
-            jumps++;
-        }
+        if (julWallLeft) { julVelY = -17; julX += 18; }
+        else if (julWallRight) { julVelY = -17; julX -= 18; }
+        else julVelY = -17;
     }
+
+    if (e.key === ".") { dashShadow(jul, julX, julY); julX += 180; }
+    if (e.key === "-") { dashShadow(jul, julX, julY); julX -= 180; }
+
+    if (e.key === "a") enesLeft = true;
+    if (e.key === "d") enesRight = true;
+
+    if (e.key === "w") {
+        if (enesWallLeft) { enesVelY = -17; enesX += 18; }
+        else if (enesWallRight) { enesVelY = -17; enesX -= 18; }
+        else enesVelY = -17;
+    }
+
+    if (e.key === "q") { dashShadow(enes, enesX, enesY); enesX -= 180; }
+    if (e.key === "e") { dashShadow(enes, enesX, enesY); enesX += 180; }
 });
 
 document.addEventListener("keyup", e => {
-    if (e.key === "ArrowLeft") left = false;
-    if (e.key === "ArrowRight") right = false;
+    if (e.key === "ArrowLeft") julLeft = false;
+    if (e.key === "ArrowRight") julRight = false;
+    if (e.key === "a") enesLeft = false;
+    if (e.key === "d") enesRight = false;
 });
 
-// game loop
-setInterval(() => {
+function applyPhysics(x, y, velY, width, height, wallObj) {
+    let prevY = y;
+    velY += gravity;
+    y += velY;
 
-    prevY = y;
-
-    if (left) x -= 7;
-    if (right) x += 7;
-
-    velocityY += gravity;
-    y += velocityY;
-
-    // TAK
-    if (y < 0) {
-        y = 0;
-        velocityY = 0;
+    let ground = window.innerHeight - height;
+    if (y > ground) {
+        y = ground;
+        velY = 0;
     }
 
-    // PLATFORM COLLISION
     platforms.forEach(p => {
-        let wasAbove = prevY + size <= p.y;
-        let isFalling = velocityY >= 0;
-
-        if (
-            x + size > p.x &&
-            x < p.x + p.w &&
-            y + size >= p.y &&
-            wasAbove &&
-            isFalling
-        ) {
-            y = p.y - size;
-            velocityY = 0;
-            jumps = 0;
+        let wasAbove = prevY + height <= p.y;
+        let isFalling = velY >= 0;
+        if (x + width > p.x && x < p.x + p.w && y + height >= p.y && wasAbove && isFalling) {
+            y = p.y - height;
+            velY = 0;
         }
     });
 
-    // mark
-    let groundY = window.innerHeight - size;
-    if (y > groundY) {
-        y = groundY;
-        velocityY = 0;
-        jumps = 0;
-    }
-
-    // väggar
-    let maxX = window.innerWidth - size;
-
-    touchingLeftWall = false;
-    touchingRightWall = false;
+    wallObj.left = false;
+    wallObj.right = false;
 
     if (x <= 0) {
         x = 0;
-        touchingLeftWall = true;
+        wallObj.left = true;
     }
 
-    if (x >= maxX) {
-        x = maxX;
-        touchingRightWall = true;
+    if (x + width >= window.innerWidth) {
+        x = window.innerWidth - width;
+        wallObj.right = true;
     }
 
-    player.style.left = x + "px";
-    player.style.top = y + "px";
+    return {x, y, velY};
+}
+
+setInterval(() => {
+    if (julLeft) julX -= 7;
+    if (julRight) julX += 7;
+
+    let julData = applyPhysics(julX, julY, julVelY, 60, 60, {left: julWallLeft, right: julWallRight});
+    julX = julData.x;
+    julY = julData.y;
+    julVelY = julData.velY;
+    julWallLeft = julData.left;
+    julWallRight = julData.right;
+
+    jul.style.left = julX + "px";
+    jul.style.top = julY + "px";
+
+    if (enesLeft) enesX -= 7;
+    if (enesRight) enesX += 7;
+
+    let enesData = applyPhysics(enesX, enesY, enesVelY, 70, 70, {left: enesWallLeft, right: enesWallRight});
+    enesX = enesData.x;
+    enesY = enesData.y;
+    enesVelY = enesData.velY;
+    enesWallLeft = enesData.left;
+    enesWallRight = enesData.right;
+
+    enes.style.left = enesX + "px";
+    enes.style.top = enesY + "px";
 
 }, 30);
 </script>
